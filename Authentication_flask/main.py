@@ -58,7 +58,7 @@ def register():
         new_user = User(
             email = request.form.get('email'),
             name = request.form.get('name'),
-            password = h_s_password,
+            password = h_s_password
         )
         db.session.add(new_user)
         db.session.commit()
@@ -77,7 +77,7 @@ def login():
         password = request.form.get('password')
 
         # find user by email entered
-        user = db.session.execute(db.select(User).where(User.email == email)).scalars()
+        user = db.session.execute(db.select(User).where(User.email == email)).scalar()
 
         # check stored password hash against entered password hashes
         if check_password_hash(user.password, password):
@@ -88,6 +88,7 @@ def login():
 
 
 @app.route('/secrets')
+@login_required
 def secrets():
     print(current_user.name)
     #passing the name from the current_user
@@ -101,7 +102,7 @@ def logout():
 
 
 # Only logged-in users can down download the pdf
-@app.route('/download', methods=['POST'])
+@app.route('/download', methods=["GET"])
 @login_required
 def download():
     return send_from_directory('static', path="files/cheat_sheet.pdf")
