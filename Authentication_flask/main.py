@@ -8,6 +8,7 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret-key-goes-here'
 
+
 # CREATE DATABASE
 class Base(DeclarativeBase):
     pass
@@ -41,12 +42,22 @@ with app.app_context():
 
 @app.route('/')
 def home():
-    return render_template("index.html")
+    # Passing True or False if the user is authenticated.
+    return render_template("index.html", logged_in=current_user.is_authenticated)
 
 
 @app.route('/register', methods=["GET","POST"])
 def register():
     if request.method == "POST":
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        # find user by email entered
+        user = db.session.execute(db.select(User).where(User.email == email)).scalar()
+        if user:
+            flash("You've already signed up with that email, log in instead!")
+            return redirect(url_for('login'))
+
         # hashing and salting the password enterd by the user
         h_s_password = generate_password_hash(
             request.form.get('password'),
@@ -54,7 +65,7 @@ def register():
             salt_length=8
         )
 
-        # storing the hased password in our database
+        # storing the hashed password in our database
         new_user = User(
             email = request.form.get('email'),
             name = request.form.get('name'),
@@ -67,7 +78,8 @@ def register():
         login_user(new_user)
         return redirect(url_for('secrets'))
 
-    return render_template("register.html")
+    return render_template("register.html", logged_in=current_user.is_authenticated)
+
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -79,20 +91,25 @@ def login():
         # find user by email entered
         user = db.session.execute(db.select(User).where(User.email == email)).scalar()
 
-        # check stored password hash against entered password hashes
-        if check_password_hash(user.password, password):
+        if not user:
+            flash("That email does not exist, please try again.")
+            return redirect(url_for('login'))
+        elif not check_password_hash(user.password, password):
+            flash('Password incorrect, please try again.')
+            return redirect(url_for('login'))
+        else:
             login_user(user)
             return redirect(url_for('secrets'))
 
-    return render_template("login.html")
+    # Passing True or False if the user is authenticated.
+    return render_template("login.html", logged_in=current_user.is_authenticated)
 
 
 @app.route('/secrets')
 @login_required
 def secrets():
     print(current_user.name)
-    #passing the name from the current_user
-    return render_template("secrets.html", name=current_user.name)
+    return render_template("secrets.html", name=current_user.name, logged_in=True)
 
 
 @app.route('/logout')
