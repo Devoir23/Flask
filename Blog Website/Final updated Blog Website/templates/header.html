@@ -8,7 +8,7 @@
     />
     <meta name="description" content="" />
     <meta name="author" content="" />
-    <title>Kartavya's Blog</title>
+    <title>Angela's Blog</title>
     {% block styles %}
     <!-- Load Bootstrap-Flask CSS here -->
     {{ bootstrap.load_css() }}
@@ -66,8 +66,7 @@
                 >Home</a
               >
             </li>
-            <!-- Only show Login/Register if user is logged out. Otherwise show "Log Out" -->
-            {% if not current_user.is_authenticated: %}
+            <!-- TODO: Only show Login/Register if user is logged out. Otherwise show "Log Out" -->
             <li class="nav-item">
               <a
                 class="nav-link px-lg-3 py-3 py-lg-4"
@@ -82,7 +81,6 @@
                 >Register</a
               >
             </li>
-            {% else: %}
             <li class="nav-item">
               <a
                 class="nav-link px-lg-3 py-3 py-lg-4"
@@ -90,7 +88,6 @@
                 >Log Out</a
               >
             </li>
-            {% endif %}
             <li class="nav-item">
               <a
                 class="nav-link px-lg-3 py-3 py-lg-4"
